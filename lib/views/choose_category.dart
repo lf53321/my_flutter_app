@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
+import '../controllers/mascot_lottie_controller.dart';
 import '../widgets/custom_text.dart';
 import '../widgets/menu_item.dart';
 import 'choose_level.dart';
 
 class ChooseCategory extends StatelessWidget {
+  final mascotController = Get.put(MascotLottieController());
   String mode;
 
   ChooseCategory(this.mode);
@@ -30,29 +33,67 @@ class ChooseCategory extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                  height: height * 0.25,
-                  width: width * 0.8,
-                  child: FittedBox(
-                      child: CustomText(
-                          mode == "quiz" ? "Kviz" : "Učenje",
-                          TextStyle(
-                              color: Colors.blue, fontSize: height * 0.2)))),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  MenuItem(
-                      "Slogovi",
-                      () => {
-                            Get.to(() => ChooseLevel(mode, "syllables"),
-                                transition: Transition.noTransition)
-                          }),
-                  MenuItem(
-                      "Pojmovi",
-                      () => {
-                            Get.to(() => ChooseLevel(mode, "words"),
-                                transition: Transition.noTransition)
-                          }),
-                ],
+                  height: height * 0.5,
+                  width: width * 0.85,
+                  child: Row(
+                        children: [
+                           Lottie.asset(
+                             width: width * 0.3,
+                            'assets/lottie/elephant.json',
+                            controller: mascotController.controller,
+                            onLoaded: (composition) {
+                              mascotController.controller.duration = composition.duration;
+                              mascotController.controller.forward();
+                            }
+                      ),
+                          SizedBox(
+                            width: width * 0.55,
+                              child: Container(
+                                child: CustomText(
+                                    mode == "quiz" ? "Odaberi kategoriju za kviz" : "Odaberi kategoriju za učenje",
+                                    TextStyle(
+                                        color: Colors.blue, fontSize: height * 0.1)),
+                              ),
+                            ),
+                        ],
+                      )),
+              SizedBox(
+                height: height * 0.4,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: height * 0.1,
+                          child: Image.asset('assets/desc/syllables.PNG',
+                              fit: BoxFit.fitWidth),
+                        ),
+                        MenuItem(
+                            "Slogovi",
+                            () => {
+                                  Get.to(() => ChooseLevel(mode, "syllables"),
+                                      transition: Transition.noTransition)
+                                }),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: height * 0.1,
+                          child: Image.asset('assets/desc/terms.PNG',
+                              fit: BoxFit.fitWidth),
+                        ),
+                        MenuItem(
+                            "Pojmovi",
+                            () => {
+                                  Get.to(() => ChooseLevel(mode, "words"),
+                                      transition: Transition.noTransition)
+                                }),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

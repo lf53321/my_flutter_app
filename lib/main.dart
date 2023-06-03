@@ -16,6 +16,7 @@ void main() async {
     final directory = await getApplicationDocumentsDirectory();
     String localPath = directory.path;
     await settings.put("directory", localPath);
+    await settings.put("showGuide", true);
   }
 
   final manifestJson = await rootBundle.loadString('AssetManifest.json');
@@ -68,6 +69,10 @@ void main() async {
   Box userData = await Hive.openBox("user_data");
 
   runApp(GetMaterialApp(
+    routes: {
+      '/Home': (context) => Home(),
+    },
+    initialRoute: "/Home",
     title: "Slogalo",
     home: Home(),
     theme: ThemeData(

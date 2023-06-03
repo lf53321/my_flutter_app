@@ -1,8 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:my_flutter_app/widgets/custom_text.dart';
 
@@ -42,14 +39,20 @@ class Settings extends StatelessWidget {
                         )),
                   SwitchListTile(
                     title: ListTile(
-                      leading: const Icon(
-                        Icons.contrast,
-                        color: Colors.blue,
+                      leading: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.contrast,
+                            color: Colors.blue,
+                            size: height * 0.05,
+                          ),
+                        ],
                       ),
-                      title: CustomText("Kontrast", null),
+                      title: CustomText("Kontrast", TextStyle(fontSize: height * 0.06)),
                       subtitle: box.get("highContrast")
-                          ? CustomText("Povećani kontrast", null)
-                          : CustomText("Normalni kontrast", null),
+                          ? CustomText("Povećani kontrast", TextStyle(fontSize: height * 0.04))
+                          : CustomText("Normalni kontrast", TextStyle(fontSize: height * 0.04)),
                     ),
                     value: box.get("highContrast"),
                     onChanged: (bool value) {
@@ -64,14 +67,20 @@ class Settings extends StatelessWidget {
                   ),
                   SwitchListTile(
                     title: ListTile(
-                      leading: const Icon(
-                        Icons.font_download,
-                        color: Colors.blue,
+                      leading: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.font_download,
+                            color: Colors.blue,
+                            size: height * 0.05,
+                          ),
+                        ],
                       ),
-                      title: CustomText("Veličina slova", null),
+                      title: CustomText("Veličina slova", TextStyle(fontSize: height * 0.06)),
                       subtitle: box.get("caps")
-                          ? CustomText("Velika slova", null)
-                          : CustomText("Mala slova", null),
+                          ? CustomText("Velika slova", TextStyle(fontSize: height * 0.04))
+                          : CustomText("Mala slova", TextStyle(fontSize: height * 0.04)),
                     ),
                     value: box.get("caps"),
                     onChanged: (bool value) {
@@ -80,14 +89,20 @@ class Settings extends StatelessWidget {
                   ),
                   SwitchListTile(
                     title: ListTile(
-                      leading: const Icon(
-                        Icons.view_list,
-                        color: Colors.blue,
+                      leading: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.view_list,
+                            color: Colors.blue,
+                            size: height * 0.05,
+                          ),
+                        ],
                       ),
-                      title: CustomText("Prikaz", null),
+                      title: CustomText("Prikaz", TextStyle(fontSize: height * 0.06)),
                       subtitle: box.get("listView")
-                          ? CustomText("Lista", null)
-                          : CustomText("Pojedinačno", null),
+                          ? CustomText("Lista", TextStyle(fontSize: height * 0.04))
+                          : CustomText("Pojedinačno", TextStyle(fontSize: height * 0.04)),
                     ),
                     value: box.get("listView"),
                     onChanged: (bool value) {
