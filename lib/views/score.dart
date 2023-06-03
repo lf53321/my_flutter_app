@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
+import 'package:my_flutter_app/views/my_terms.dart';
+import '../controllers/mascot_lottie_controller.dart';
 import '../widgets/custom_text.dart';
 import '../widgets/menu_item.dart';
 import 'choose_category.dart';
 import 'home.dart';
+import 'learn.dart';
 
 class Score extends StatelessWidget {
-  String category;
-  String level;
-  int score;
+  final mascotController = Get.put(MascotLottieController());
+  String? category;
+  String? level;
 
-  Score(this.category, this.level, this.score);
+  Score(this.category, this.level);
+
+  Score.user();
 
   @override
   Widget build(BuildContext context) {
@@ -18,45 +24,60 @@ class Score extends StatelessWidget {
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
         body: Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Center(
-          child: SizedBox(
-            width: width * 0.8,
-            child: FittedBox(
-              child: CustomText("Rezultat: $score/3",
-                  TextStyle(color: Colors.blue, fontSize: height * 0.3)),
+        SizedBox(
+            width: width * 0.85,
+            height: height * 0.5,
+            child: Row(
+              children: [
+                Lottie.asset(
+                    width: width * 0.3,
+                    'assets/lottie/elephant.json',
+                    controller: mascotController.controller,
+                    onLoaded: (composition) {
+                      mascotController.controller.duration =
+                          composition.duration;
+                      mascotController.controller.forward();
+                    }),
+                SizedBox(
+                  width: width * 0.55,
+                  child: CustomText("Bravo! Odaberi što dalje",
+                      TextStyle(color: Colors.blue, fontSize: height * 0.1)),
+                ),
+              ],
             ),
           ),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            MenuItem(
-                "Kviz",
-                () => {
-                      Get.offUntil(
-                          PageRouteBuilder(
-                              pageBuilder: (context, a1, a2) =>
-                                  ChooseCategory("quiz")),
-                          (route) => route.settings.name == '/'),
-                    }),
-            MenuItem(
-                "Učenje",
-                () => {
-                      Get.offUntil(
-                          PageRouteBuilder(
-                              pageBuilder: (context, a1, a2) =>
-                                  ChooseCategory("learn")),
-                          (route) => route.settings.name == '/'),
-                    }),
-            MenuItem(
-                "Početna",
-                () => {
-                      Get.offAll(() => Home(),
-                          transition: Transition.noTransition)
-                    }),
-          ],
+        SizedBox(
+          height: height * 0.4,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              MenuItem(
+                  "Nova igra",
+                  () => {
+                        Get.offUntil(
+                            GetPageRoute(
+                                page: () => ChooseCategory("quiz"),
+                                transition: Transition.noTransition),
+                            (route) => route.settings.name == "/Home"),
+                      }),
+              MenuItem(
+                  "Ponovi gradivo",
+                  () async => {
+                        await Get.offUntil(
+                            GetPageRoute(
+                                page: () => category != null ? Learn(category!, level!) : MyTerms(false),
+                                transition: Transition.noTransition),
+                            (route) => route.settings.name == '/Home'),
+                      }),
+              MenuItem(
+                  "Povratak",
+                  () => {
+                        Get.offAll(() => Home(),
+                            transition: Transition.noTransition)
+                      }),
+            ],
+          ),
         )
       ],
     ));

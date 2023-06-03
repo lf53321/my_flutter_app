@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:just_audio/just_audio.dart';
 import '../controllers/audio_controller.dart';
 import '../controllers/item_controller.dart';
 import '../widgets/custom_text.dart';
@@ -9,11 +10,18 @@ import 'edit.dart';
 
 class MyTerms extends StatelessWidget {
   AudioController audioController = Get.put(AudioController());
+  String localPath = Hive.box("settings").get("directory");
   ItemController? itemController;
   Box db = Hive.box("user_data");
   bool editable;
 
-  MyTerms(this.editable);
+  MyTerms(this.editable) {
+    if (!editable && !Hive.box('settings').get("listView") && db.isNotEmpty) {
+      audioController.player.setAudioSource(AudioSource.file(
+          '$localPath/userData/${db.values.elementAt(0)}.mp3'));
+      audioController.player.play();
+    }
+  }
 
   @override
   Widget build(context) {
@@ -94,6 +102,11 @@ class MyTerms extends StatelessWidget {
                                                       .player.playing)
                                                     audioController.player
                                                         .stop(),
+                                                  audioController.player
+                                                      .setAudioSource(
+                                                          AudioSource.file(
+                                                              '$localPath/userData/${itemController!.current.value}.mp3')),
+                                                  audioController.player.play(),
                                                 },
                                             icon: const Icon(
                                               Icons.arrow_circle_left_outlined,
@@ -116,7 +129,12 @@ class MyTerms extends StatelessWidget {
                                                   if (audioController
                                                       .player.playing)
                                                     audioController.player
-                                                        .stop()
+                                                        .stop(),
+                                                  audioController.player
+                                                      .setAudioSource(
+                                                          AudioSource.file(
+                                                              '$localPath/userData/${itemController!.current.value}.mp3')),
+                                                  audioController.player.play(),
                                                 },
                                             icon: const Icon(
                                               Icons.arrow_circle_right_outlined,

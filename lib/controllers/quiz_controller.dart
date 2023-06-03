@@ -14,7 +14,11 @@ class QuizController extends GetxController {
   Box db;
 
   QuizController(this.db) {
-    remaining = db.keys.map((e) => e.toString()).toList();
+    if(db.name == "user_data") {
+      remaining = db.values.map((e) => e.toString()).toList();
+    } else {
+      remaining = db.keys.map((e) => e.toString()).toList();
+    }
     all.addAll(remaining);
     getQuestion();
   }
@@ -42,7 +46,8 @@ class QuizController extends GetxController {
     update();
   }
 
-  void processAnswer(String userAnswer) async {
+  Future<void> processAnswer(String userAnswer) async {
+    if (userAnswer != answer.value) return;
     if (userAnswer == answer.value) score++;
     index.value++;
     if (index.value == 3) {

@@ -16,6 +16,20 @@ class Learn extends StatelessWidget {
 
   Learn(this.category, this.level) {
     db = Hive.box("${category}_$level");
+    if (!Hive.box('settings').get("listView")) {
+      if (category != "words") {
+         audioController.player
+            .setAudioSource(AudioSource.asset('${db?.getAt(0)}'));
+      } else {
+        audioController.player
+            .setAudioSource(ConcatenatingAudioSource(children: [
+          for (String syllable in db?.keys.elementAt(0).split("-"))
+            AudioSource.asset('assets/syllables/level$level/$syllable.m4a'),
+          AudioSource.asset('assets/$category/level$level/${db?.keys.elementAt(0)}.m4a')
+        ]));
+      }
+      audioController.player.play();
+    }
   }
 
   @override
@@ -73,6 +87,29 @@ class Learn extends StatelessWidget {
                                         itemController?.prevItem(),
                                         if (audioController.player.playing)
                                           audioController.player.stop(),
+                                        if (category != "words")
+                                          {
+                                            audioController.player.setAudioSource(
+                                                AudioSource.asset(
+                                                    'assets/$category/level$level/${itemController!.current.value}.m4a')),
+                                          }
+                                        else
+                                          {
+                                            audioController.player
+                                                .setAudioSource(
+                                                    ConcatenatingAudioSource(
+                                                        children: [
+                                                  for (String syllable
+                                                      in itemController!
+                                                          .current.value
+                                                          .split("-"))
+                                                    AudioSource.asset(
+                                                        'assets/syllables/level$level/$syllable.m4a'),
+                                                  AudioSource.asset(
+                                                      'assets/$category/level$level/${itemController!.current.value}.m4a')
+                                                ])),
+                                          },
+                                        audioController.player.play(),
                                       },
                                   icon: const Icon(
                                     Icons.arrow_circle_left_outlined,
@@ -93,7 +130,30 @@ class Learn extends StatelessWidget {
                                   onPressed: () => {
                                         itemController?.nextItem(),
                                         if (audioController.player.playing)
-                                          audioController.player.stop()
+                                          audioController.player.stop(),
+                                        if (category != "words")
+                                          {
+                                            audioController.player.setAudioSource(
+                                                AudioSource.asset(
+                                                    'assets/$category/level$level/${itemController!.current.value}.m4a')),
+                                          }
+                                        else
+                                          {
+                                            audioController.player
+                                                .setAudioSource(
+                                                    ConcatenatingAudioSource(
+                                                        children: [
+                                                  for (String syllable
+                                                      in itemController!
+                                                          .current.value
+                                                          .split("-"))
+                                                    AudioSource.asset(
+                                                        'assets/syllables/level$level/$syllable.m4a'),
+                                                  AudioSource.asset(
+                                                      'assets/$category/level$level/${itemController!.current.value}.m4a')
+                                                ])),
+                                          },
+                                        audioController.player.play(),
                                       },
                                   icon: const Icon(
                                     Icons.arrow_circle_right_outlined,

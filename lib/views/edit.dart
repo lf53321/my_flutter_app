@@ -1,10 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:my_flutter_app/views/image_chooser.dart';
+import 'package:my_flutter_app/widgets/guide_dialog.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../controllers/audio_controller.dart';
@@ -14,13 +18,19 @@ import 'my_terms.dart';
 class ImageController extends GetxController {
   var hasData = false.obs;
   File? imageFile;
-  placeImage(File? imageFile) {
+  placeImage(File imageFile) {
     this.imageFile = imageFile;
     if (imageFile != null) {
       hasData.value = true;
     } else {
       hasData.value = false;
     }
+    update();
+  }
+
+  clear() {
+    imageFile = null;
+    hasData.value = false;
     update();
   }
 }
@@ -84,12 +94,11 @@ class UserAudioController extends GetxController {
 class Edit extends StatelessWidget {
   ImageController imageController = Get.put(ImageController());
   UserAudioController audioController = Get.put(UserAudioController());
-  // final controllerTerm = TextEditingController();
   final controllerSyllables = TextEditingController();
   String localPath = Hive.box("settings").get("directory");
   String? oldData;
 
-  Edit();
+  Edit(){}
 
   Edit.old(this.oldData) {
     imageController.placeImage(File('$localPath/userData/$oldData.png'));
@@ -114,38 +123,53 @@ class Edit extends StatelessWidget {
               width: width * 0.65,
               alignment: Alignment.center,
               child: imageController.imageFile == null
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        ElevatedButton(
-                          onPressed: () {
-                            _getFromGallery();
-                          },
-                          child: CustomText("Slika iz galerije", null),
-                        ),
-                        Container(
-                          height: 40.0,
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            _getFromCamera();
-                          },
-                          child: CustomText("Slika iz kamere", null),
-                        )
-                      ],
+                  ? SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          ElevatedButton(
+                            onPressed: () {
+                              _getFromGallery();
+                            },
+                            child: CustomText("Slika iz galerije", null),
+                          ),
+                          Container(
+                            height: 20.0,
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              _getFromCamera();
+                            },
+                            child: CustomText("Slika iz kamere", null),
+                          ),
+                          Container(
+                            height: 20.0,
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              Get.to(() => ImageChooser());
+                            },
+                            child: CustomText("Postojeće slike", null),
+                          )
+                        ],
+                      ),
                     )
                   : Stack(fit: StackFit.expand, children: [
-                      Image.file(
-                        imageController.imageFile!,
-                        fit: BoxFit.fitHeight,
-                      ),
+                      !imageController.imageFile!.path.contains("assets")
+                          ? Image.file(
+                              imageController.imageFile!,
+                              fit: BoxFit.contain,
+                            )
+                          : Image.asset(
+                              imageController.imageFile!.path,
+                              fit: BoxFit.contain,
+                            ),
                       Positioned(
                           top: 20,
                           right: 20,
                           child: IconButton(
                               iconSize: height * 0.1,
-                              onPressed: () =>
-                                  {imageController.placeImage(null)},
+                              onPressed: () => {imageController.clear()},
                               icon: const Icon(
                                 Icons.restart_alt,
                                 color: Colors.blue,
@@ -162,16 +186,13 @@ class Edit extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Padding(
-                  //   padding: const EdgeInsets.all(8.0),
-                  //   child: TextField(
-                  //     controller: controllerTerm,
-                  //     decoration: const InputDecoration(
-                  //       border: OutlineInputBorder(),
-                  //       labelText: 'Pojam',
-                  //     ),
-                  //   ),
-                  // ),
+                  IconButton(
+                      iconSize: height * 0.15,
+                      icon: const Icon(Icons.info_outline, color: Colors.blue),
+                      onPressed: () => Get.dialog(
+                              GuideDialog(),
+                          ),
+                        ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
@@ -184,47 +205,49 @@ class Edit extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        IconButton(
-                            iconSize: height * 0.15,
-                            onPressed: () async {
-                              if (!audioController.recorder.isRecording) {
-                                await audioController.start();
-                              } else {
-                                await audioController.stop();
-                              }
-                            },
-                            icon: Obx(() => Icon(
-                                  !audioController.isRecording.value
-                                      ? Icons.mic
-                                      : Icons.stop,
-                                  color: Colors.blue,
-                                ))),
-                        Obx(() => IconButton(
-                            iconSize: height * 0.15,
-                            icon: Icon(
-                              Icons.play_arrow,
-                              color: audioController.hasData.value
-                                  ? Colors.blue
-                                  : Colors.grey,
-                            ),
-                            onPressed: !audioController.hasData.value
-                                ? null
-                                : () => audioController.play())),
-                        Obx(() => IconButton(
-                            iconSize: height * 0.15,
-                            onPressed: !audioController.hasData.value
-                                ? null
-                                : () => audioController.clear(),
-                            icon: Icon(
-                              Icons.restart_alt,
-                              color: audioController.hasData.value
-                                  ? Colors.blue
-                                  : Colors.grey,
-                            ))),
-                      ],
+                    child: FittedBox(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          IconButton(
+                              iconSize: height * 0.15,
+                              onPressed: () async {
+                                if (!audioController.recorder.isRecording) {
+                                  await audioController.start();
+                                } else {
+                                  await audioController.stop();
+                                }
+                              },
+                              icon: Obx(() => Icon(
+                                    !audioController.isRecording.value
+                                        ? Icons.mic
+                                        : Icons.stop,
+                                    color: Colors.blue,
+                                  ))),
+                          Obx(() => IconButton(
+                              iconSize: height * 0.15,
+                              icon: Icon(
+                                Icons.play_arrow,
+                                color: audioController.hasData.value
+                                    ? Colors.blue
+                                    : Colors.grey,
+                              ),
+                              onPressed: !audioController.hasData.value
+                                  ? null
+                                  : () => audioController.play())),
+                          Obx(() => IconButton(
+                              iconSize: height * 0.15,
+                              onPressed: !audioController.hasData.value
+                                  ? null
+                                  : () => audioController.clear(),
+                              icon: Icon(
+                                Icons.restart_alt,
+                                color: audioController.hasData.value
+                                    ? Colors.blue
+                                    : Colors.grey,
+                              ))),
+                        ],
+                      ),
                     ),
                   ),
                   Row(
@@ -252,21 +275,24 @@ class Edit extends StatelessWidget {
                                         await File(
                                                 '$localPath/userData/$oldData.png')
                                             .delete(),
-                                        await userData.delete(oldData?.replaceAll("-", ""))
+                                        await userData.delete(
+                                            oldData?.replaceAll("-", ""))
                                       },
-                                    if(!userData.containsKey(controllerSyllables.text
-                                        .replaceAll("-", ""))) {
-                                      userData.put(
-                                          controllerSyllables.text
-                                              .replaceAll("-", ""),
-                                          controllerSyllables.text),
-                                    },
+                                    if (!userData.containsKey(
+                                        controllerSyllables.text
+                                            .replaceAll("-", "")))
+                                      {
+                                        userData.put(
+                                            controllerSyllables.text
+                                                .replaceAll("-", ""),
+                                            controllerSyllables.text),
+                                      },
                                     Get.offUntil(
-                                        PageRouteBuilder(
+                                        GetPageRoute(
                                             transitionDuration: 1.seconds,
-                                            pageBuilder: (context, _, __) =>
-                                                MyTerms(true)),
-                                        (route) => route.settings.name == '/')
+                                            page: () => MyTerms(true)),
+                                        (route) =>
+                                            route.settings.name == '/Home')
                                   }
                               : null,
                           icon: Icon(
@@ -296,7 +322,7 @@ class Edit extends StatelessWidget {
     ));
   }
 
-  /// Get from gallery
+  // Get from gallery
   _getFromGallery() async {
     XFile? pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -308,7 +334,7 @@ class Edit extends StatelessWidget {
     }
   }
 
-  /// Get from Camera
+  // Get from Camera
   _getFromCamera() async {
     XFile? pickedFile = await ImagePicker().pickImage(
       source: ImageSource.camera,
@@ -324,14 +350,19 @@ class Edit extends StatelessWidget {
     final directory = await getApplicationDocumentsDirectory();
     String localPath = directory.path;
     File file = File('$localPath/userData/$name.png');
-    if(!await file.exists()) {
+    if (!await file.exists()) {
       await file.create(recursive: true);
     }
-    if(imageFile?.path != file.path) {
-      await imageFile?.copy(file.path);
+    if (imageFile?.path != file.path) {
+      if (imageFile!.path.contains("assets")) {
+        await file.writeAsBytes(
+            (await rootBundle.load(imageFile.path)).buffer.asUint8List());
+      } else {
+        await imageFile.copy(file.path);
+      }
     }
     file = File('$localPath/userData/$name.mp3');
-    if(!await file.exists()) {
+    if (!await file.exists()) {
       await file.create(recursive: true);
     }
     if (audioFile?.path != file.path) {

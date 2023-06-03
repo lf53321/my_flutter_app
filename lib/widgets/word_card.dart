@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
@@ -56,53 +55,55 @@ class WordCard extends StatelessWidget {
                     SizedBox(
                         height: height * 0.3,
                         child: FittedBox(
-                            child: CustomText(entry.replaceAll("-", ""),
-                                TextStyle(fontSize: height * 0.3)))),
+                            child: CustomText(
+                                entry, TextStyle(fontSize: height * 0.3)))),
                     category != null
                         ? Image.asset('assets/$category/level$level/$entry.png',
-                            fit: BoxFit.cover)
+                            fit: BoxFit.contain)
                         : SizedBox(
                             height: height,
                             width: width * 0.5,
-                            child: Image.file(
-                                File('$localPath/userData/$entry.png'),
-                                fit: BoxFit.fitHeight),
+                            child: Image.memory(
+                                File('$localPath/userData/$entry.png').readAsBytesSync(),
+                                fit: BoxFit.contain),
                           ),
                     SizedBox(
                         height: height * 0.3,
                         child: FittedBox(
-                            child: CustomText(
-                                entry, TextStyle(fontSize: height * 0.3)))),
+                            child: CustomText(entry.replaceAll("-", ""),
+                                TextStyle(fontSize: height * 0.3)))),
                   ],
                 )),
           ),
         ),
-        editable ? Positioned(
-            top: 0,
-            right: 0,
-            child: IconButton(
-                iconSize: height * 0.1,
-                onPressed: () async => {
-                  await File('$localPath/userData/$entry.png').delete(),
-                  await File('$localPath/userData/$entry.mp3').delete(),
-                  await userData.delete(entry.replaceAll("-", ""))
-                },
-                icon: const Icon(
-                  Icons.delete,
-                  color: Colors.black54,
-                ))) : const SizedBox.shrink(),
-        editable ? Positioned(
-            top: 0,
-            left: 0,
-            child: IconButton(
-                iconSize: height * 0.1,
-                onPressed: () => {
-                  Get.to(() => Edit.old(entry))
-                },
-                icon: const Icon(
-                  Icons.edit,
-                  color: Colors.black54,
-                ))) : const SizedBox.shrink(),
+        editable
+            ? Positioned(
+                top: 0,
+                right: 0,
+                child: IconButton(
+                    iconSize: height * 0.1,
+                    onPressed: () async => {
+                          await File('$localPath/userData/$entry.png').delete(),
+                          await File('$localPath/userData/$entry.mp3').delete(),
+                          await userData.delete(entry.replaceAll("-", ""))
+                        },
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.black54,
+                    )))
+            : const SizedBox.shrink(),
+        editable
+            ? Positioned(
+                top: 0,
+                left: 0,
+                child: IconButton(
+                    iconSize: height * 0.1,
+                    onPressed: () => {Get.to(() => Edit.old(entry))},
+                    icon: const Icon(
+                      Icons.edit,
+                      color: Colors.black54,
+                    )))
+            : const SizedBox.shrink(),
       ]),
     );
   }
